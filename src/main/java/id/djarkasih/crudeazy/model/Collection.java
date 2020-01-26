@@ -22,28 +22,28 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints={
     @UniqueConstraint(columnNames = {"databaseId", "name"})
 }) 
-public class Record {
+public class Collection {
     
     @Id
     @GeneratedValue
-    private Long recordId;
+    private Long collectionId;
     @ManyToOne
     @JoinColumn(name = "databaseId")
     private Database database;
     private int kind;
     private String name;
 
-    protected Record() {
+    protected Collection() {
         this.kind = 0;
     }
 
-    public Record(String name) {
+    public Collection(String name) {
         this.kind = 0;
         this.name = name;
     }
 
-    public Long getRecordId() {
-        return recordId;
+    public Long getCollectionId() {
+        return collectionId;
     }
 
     public Database getDatabase() {
@@ -73,7 +73,7 @@ public class Record {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Record{recordId=").append(recordId);
+        sb.append("Collection{collectionId=").append(collectionId);
         sb.append(", kind=").append(kind);
         sb.append(", name=").append(name);
         sb.append('}');
@@ -83,7 +83,7 @@ public class Record {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 67 * hash + Objects.hashCode(this.recordId);
+        hash = 67 * hash + Objects.hashCode(this.collectionId);
         hash = 67 * hash + Objects.hashCode(this.name);
         return hash;
     }
@@ -99,11 +99,11 @@ public class Record {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Record other = (Record) obj;
+        final Collection other = (Collection) obj;
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
-        if (!Objects.equals(this.recordId, other.recordId)) {
+        if (!Objects.equals(this.collectionId, other.collectionId)) {
             return false;
         }
         return true;

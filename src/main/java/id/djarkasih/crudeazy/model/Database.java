@@ -51,24 +51,24 @@ public class Database {
         fetch = FetchType.EAGER
     )
     @MapKey(name="name")
-    private final Map<String,Record> records;
+    private final Map<String,Collection> colls;
 
-    public void addRecord(Record rec) {
-        records.put(rec.getName(), rec);
-        rec.setDatabase(this);
+    public void addCollection(Collection coll) {
+        colls.put(coll.getName(), coll);
+        coll.setDatabase(this);
     }
  
-    public void removeRecord(Record rec) {
-        records.remove(rec.getName());
-        rec.setDatabase(null);
+    public void removeCollection(Collection coll) {
+        colls.remove(coll.getName());
+        coll.setDatabase(null);
     }
 
     protected Database() {
-        this.records = new HashMap();
+        this.colls = new HashMap();
     }
 
     public Database(String name, String driverName, String url, String username, String password) {
-        this.records = new HashMap();
+        this.colls = new HashMap();
         this.name = name;
         this.driverName = driverName;
         this.url = url;
@@ -128,8 +128,8 @@ public class Database {
         this.manager = manager;
     }
 
-    public Map<String, Record> getRecords() {
-        return records;
+    public Map<String, Collection> getRecords() {
+        return colls;
     }
 
     @Override

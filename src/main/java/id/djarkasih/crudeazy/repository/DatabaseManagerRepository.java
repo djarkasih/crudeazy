@@ -15,8 +15,8 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface DatabaseManagerRepository extends CrudRepository<DatabaseManager,Long> {
     
-    @Query(value ="select count(*) from record", nativeQuery=true)
-    long numberOfRecord();
+    @Query(value ="select count(*) from collection", nativeQuery=true)
+    long numberOfCollection();
     
     @Query(value ="select count(*) from database", nativeQuery=true)
     long numberOfDatabase();

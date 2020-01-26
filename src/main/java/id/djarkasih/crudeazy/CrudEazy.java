@@ -33,11 +33,12 @@ public class CrudEazy {
             Set<String> profs = Set.of(env.getActiveProfiles());
             logger.info("Active profiles = " + profs.toString());
         
-            DatabaseManager mgr = new DatabaseManager("CrudEazy");
+            DatabaseManager mgr;
 
-            if (profs.contains("dev")) {
-                mgr = new DatabaseManager("CrudEazy");
+            if ((profs.contains("dev")) && (repo.count() == 0)) {
                 
+                mgr = new DatabaseManager("CrudEazy");
+
                 var db1 = new Database(
                    "h2db",
                    "h2driver",
@@ -76,10 +77,14 @@ public class CrudEazy {
                 db2.addCollection(new Collection("table7"));
                 
                 repo.save(mgr);
+                
+                logger.info("Dummy data created.");
             }
 
             logger.info("There are " + repo.count() + " Database Manager.");
+            logger.info("There are " + repo.numberOfDatabase() + " Database.");
             logger.info("There are " + repo.numberOfCollection() + " Collection.");
+            
             mgr = repo.findByName("CrudEazy");
             if (mgr != null) {
                 logger.info("mgr = " + mgr.toString());

@@ -5,6 +5,7 @@
  */
 package id.djarkasih.crudeazy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -46,6 +47,7 @@ public class Collection {
         return collectionId;
     }
 
+    @JsonIgnore
     public Database getDatabase() {
         return database;
     }

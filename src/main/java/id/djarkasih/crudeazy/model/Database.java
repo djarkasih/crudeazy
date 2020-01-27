@@ -5,6 +5,7 @@
  */
 package id.djarkasih.crudeazy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -104,7 +105,7 @@ public class Database {
         return username;
     }
 
-    public void setUser(String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
@@ -120,6 +121,7 @@ public class Database {
         return databaseId;
     }
 
+    @JsonIgnore
     public DatabaseManager getManager() {
         return manager;
     }
@@ -128,6 +130,7 @@ public class Database {
         this.manager = manager;
     }
 
+    @JsonIgnore
     public Map<String, Collection> getRecords() {
         return colls;
     }

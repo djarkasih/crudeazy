@@ -4,6 +4,7 @@ import id.djarkasih.crudeazy.model.Database;
 import id.djarkasih.crudeazy.model.DatabaseManager;
 import id.djarkasih.crudeazy.model.Collection;
 import id.djarkasih.crudeazy.repository.DatabaseManagerRepository;
+import id.djarkasih.crudeazy.util.Constants;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +38,14 @@ public class CrudEazy {
 
             if ((profs.contains("dev")) && (repo.count() == 0)) {
                 
-                mgr = new DatabaseManager("CrudEazy");
+                mgr = new DatabaseManager(Constants.CRUD_EAZY);
 
                 var db1 = new Database(
-                   "h2db",
-                   "h2driver",
-                   "h2dburl",
-                   "h2user",
-                   "h2password"
+                   "h2mem",
+                   "org.h2.Driver",
+                   "jdbc:h2:mem:memdb",
+                   "user",
+                   "password"
                 );
                 
                 db1.addCollection(new Collection("table1"));
@@ -52,27 +53,45 @@ public class CrudEazy {
                 db1.addCollection(new Collection("table3"));
 
                 var db2 = new Database(
-                   "pgdb",
-                   "pgdriver",
-                   "pgdburl",
-                   "pguser",
-                   "pgpassword"
+                   "h2file",
+                   "org.h2.Driver",
+                   "jdbc:h2:./localdb",
+                   "user",
+                   "password"
                 );
 
                 db2.addCollection(new Collection("table1"));
                 db2.addCollection(new Collection("table2"));
                 db2.addCollection(new Collection("table3"));
 
+                var db3 = new Database(
+                   "mariadb",
+                   "org.mariadb.jdbc.Driver",
+                   "jdbc:mariadb://localhost:3306/springbootdb",
+                   "user",
+                   "password"
+                );
+
+                var db4 = new Database(
+                   "postgresdb",
+                   "org.postgresql.Driver",
+                   "jdbc:postgresql://localhost:5432/postgres",
+                   "user",
+                   "password"
+                );
+                
                 mgr.addDatabase(db1);
                 mgr.addDatabase(db2);
-                
+                mgr.addDatabase(db3);
+                mgr.addDatabase(db4);
+                                
                 repo.save(mgr);
                 
-                db1 = mgr.getDatabases().get("h2db");
+                db1 = mgr.getDatabases().get("h2mem");
                 db1.addCollection(new Collection("table4"));
                 db1.addCollection(new Collection("table5"));
 
-                db2 = mgr.getDatabases().get("pgdb");
+                db2 = mgr.getDatabases().get("h2file");
                 db2.addCollection(new Collection("table6"));
                 db2.addCollection(new Collection("table7"));
                 

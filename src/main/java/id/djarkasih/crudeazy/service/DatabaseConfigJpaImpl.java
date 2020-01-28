@@ -5,23 +5,26 @@
  */
 package id.djarkasih.crudeazy.service;
 
-import id.djarkasih.crudeazy.model.Database;
-import id.djarkasih.crudeazy.model.DatabaseManager;
+import id.djarkasih.crudeazy.model.domain.Database;
+import id.djarkasih.crudeazy.model.domain.DatabaseManager;
 import id.djarkasih.crudeazy.repository.DatabaseManagerRepository;
 import id.djarkasih.crudeazy.util.Constants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  *
  * @author ahmad
  */
 @Service("dbCfgJpaImpl")
+@Validated
 public class DatabaseConfigJpaImpl implements DatabaseConfig {
     
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConfigJpaImpl.class);
@@ -38,7 +41,7 @@ public class DatabaseConfigJpaImpl implements DatabaseConfig {
     }
 
     @Override
-    public Database save(Database inp) {
+    public Database save(@Valid Database inp) {
 
         Database out = null;
         
@@ -90,7 +93,7 @@ public class DatabaseConfigJpaImpl implements DatabaseConfig {
     }
 
     @Override
-    public void Delete(Database inp) {
+    public void Delete(@Valid Database inp) {
         
         try {
             

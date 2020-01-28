@@ -6,13 +6,15 @@
 package id.djarkasih.crudeazy.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import id.djarkasih.crudeazy.model.Database;
+import id.djarkasih.crudeazy.error.DataIncomplete;
+import id.djarkasih.crudeazy.error.DataNotFound;
+import id.djarkasih.crudeazy.model.domain.Database;
 import id.djarkasih.crudeazy.service.DatabaseConfig;
-import id.djarkasih.crudeazy.util.Envelope;
-import id.djarkasih.crudeazy.util.JsonEnvelope;
+import id.djarkasih.crudeazy.model.Envelope;
+import id.djarkasih.crudeazy.model.DataEnvelope;
 import id.djarkasih.crudeazy.util.MapUtils;
-import id.djarkasih.crudeazy.util.MultiplePayload;
-import id.djarkasih.crudeazy.util.ObjectEnvelope;
+import id.djarkasih.crudeazy.model.MultiplePayload;
+import id.djarkasih.crudeazy.model.ItemEnvelope;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value="/config")
-public class DatabaseConfigEndpoint {
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConfigEndpoint.class);
+public class DatabaseEndpoint {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseEndpoint.class);
     
     private final static Set<String> POST_KEYS = Set.of("name","driverName","url","username","password");
     private final static Set<String> PATCH_KEYS = Set.of("driverName","url","username","password");
@@ -52,18 +54,18 @@ public class DatabaseConfigEndpoint {
     private DatabaseConfig dbcfg;
     
     @PostMapping(value="/databases")
-    public ResponseEntity<Envelope> createDatabase(@RequestBody Map<String,Object> inp) {
+    public ResponseEntity<Envelope> createDatabase(@RequestBody Map<String,Object> inp) throws DataIncomplete {
         
         Set<String> missingFields = MapUtils.getMissingFields(inp, POST_KEYS);
         if (missingFields.size() > 0) {
-            
+            throw new DataIncomplete("Missing field(s) : " + missingFields.toString() + ".");
         }
         
         Database indb = mapper.convertValue(inp, Database.class);
         
         Database outdb = dbcfg.save(indb);
         
-        ObjectEnvelope env = new ObjectEnvelope(true, HttpStatus.CREATED.value(),"Database configuration created.");
+        ItemEnvelope env = new ItemEnvelope(true, HttpStatus.CREATED.value(),"Database configuration created.");
         env.setPayload(outdb);
         
         return new ResponseEntity(env,HttpStatus.CREATED);
@@ -71,15 +73,15 @@ public class DatabaseConfigEndpoint {
     }
     
     @GetMapping(value="/databases/{dbName}")
-    public ResponseEntity<Envelope> findDatabase(@PathVariable("dbName") String dbName) {
+    public ResponseEntity<Envelope> findDatabase(@PathVariable("dbName") String dbName) throws DataNotFound {
         
-        ObjectEnvelope env = null;
+        ItemEnvelope env = null;
         
         Database db = dbcfg.find(dbName);
         if (db == null) {
-            env = new ObjectEnvelope(false, HttpStatus.NOT_FOUND.value(),"Database configuration not found.");
+            throw new DataNotFound("Could not found " + dbName + " configuration database.");
         } else {
-            env = new ObjectEnvelope(true, HttpStatus.OK.value(),"Database configuration found.");
+            env = new ItemEnvelope(true, HttpStatus.OK.value(),"Database configuration found.");
         }
         
         env.setPayload(db);
@@ -99,7 +101,7 @@ public class DatabaseConfigEndpoint {
         List<Map<String,Object>> data = mapper.convertValue(dbs, List.class);
         payload.setData(data);
                 
-        JsonEnvelope env = new JsonEnvelope(true, HttpStatus.OK.value(),payload.getSize() + " database configuration(s) found.");
+        DataEnvelope env = new DataEnvelope(true, HttpStatus.OK.value(),payload.getSize() + " database configuration(s) found.");
         env.setPayload(payload);
         
         return new ResponseEntity(env,HttpStatus.OK);
@@ -108,14 +110,18 @@ public class DatabaseConfigEndpoint {
     @PutMapping(value="/databases/{dbName}")
     public ResponseEntity<Envelope> updateDatabase(
            @RequestBody Map<String,Object> inp,
-           @PathVariable("dbName") String dbName) {
+           @PathVariable("dbName") String dbName) throws DataNotFound, DataIncomplete {
         
         Database indb = dbcfg.find(dbName);
         if (indb == null) {
-            
+            throw new DataNotFound("Could not found " + dbName + " configuration database.");
         }
         
         Set<String> changedKeys = MapUtils.getPresentFields(inp, PATCH_KEYS);
+        if (changedKeys.isEmpty()) {
+            throw new DataIncomplete("Missing at least one of these following fields : " + PATCH_KEYS.toString());
+        }
+        
         Map<String,Object> changedValues = MapUtils.copy(inp, changedKeys);
         
         Database outdb = null;
@@ -125,7 +131,7 @@ public class DatabaseConfigEndpoint {
         } catch (IllegalAccessException | InvocationTargetException ex) {
         }
 
-        ObjectEnvelope env = new ObjectEnvelope(true, HttpStatus.OK.value(),"Database configuration updated.");
+        ItemEnvelope env = new ItemEnvelope(true, HttpStatus.OK.value(),"Database configuration updated.");
         env.setPayload(outdb);
         
         return new ResponseEntity(env,HttpStatus.OK);
@@ -133,23 +139,22 @@ public class DatabaseConfigEndpoint {
     
     @DeleteMapping(value="/databases/{dbName}")
     public ResponseEntity<Envelope> deleteDatabase(
-           @PathVariable("dbName") String dbName) {
+           @PathVariable("dbName") String dbName) throws DataNotFound {
         
-        ObjectEnvelope env = null;
+        ItemEnvelope env = null;
         
         Database indb = dbcfg.find(dbName);
         if (indb == null) {
-            
+            throw new DataNotFound("Could not found " + dbName + " configuration database.");
         }
         
         dbcfg.Delete(indb);
         
-
         Database outdb = dbcfg.find(dbName);
         if (outdb == null) {
-            env = new ObjectEnvelope(false, HttpStatus.OK.value(),"Database(" +  dbName + ")configuration removed.");
+            env = new ItemEnvelope(false, HttpStatus.OK.value(),"Database(" +  dbName + ")configuration removed.");
         } else {
-            env = new ObjectEnvelope(false, HttpStatus.INTERNAL_SERVER_ERROR.value(),"Could not remove Database(" +  dbName + ")configuration.");
+            env = new ItemEnvelope(false, HttpStatus.INTERNAL_SERVER_ERROR.value(),"Could not remove Database(" +  dbName + ")configuration.");
         }
 
         env.setPayload(indb);

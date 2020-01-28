@@ -5,18 +5,21 @@
  */
 package id.djarkasih.crudeazy.service;
 
-import id.djarkasih.crudeazy.model.Database;
+import id.djarkasih.crudeazy.model.domain.Database;
 import java.util.List;
+import javax.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 /**
  *
  * @author ahmad
  */
+@Validated
 public interface DatabaseConfig {
     
-    public Database save(Database inp);
+    public Database save(@Valid Database inp);
     public Database find(String name);
     public List<Database> readAll();
-    public void Delete(Database inp);
+    public void Delete(@Valid Database inp);
     
 }

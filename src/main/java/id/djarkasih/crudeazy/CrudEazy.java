@@ -1,8 +1,8 @@
 package id.djarkasih.crudeazy;
 
-import id.djarkasih.crudeazy.model.Database;
-import id.djarkasih.crudeazy.model.DatabaseManager;
-import id.djarkasih.crudeazy.model.Collection;
+import id.djarkasih.crudeazy.model.domain.Database;
+import id.djarkasih.crudeazy.model.domain.DatabaseManager;
+import id.djarkasih.crudeazy.model.domain.Collection;
 import id.djarkasih.crudeazy.repository.DatabaseManagerRepository;
 import id.djarkasih.crudeazy.util.Constants;
 import java.util.Set;
@@ -44,7 +44,7 @@ public class CrudEazy {
                    "h2mem",
                    "org.h2.Driver",
                    "jdbc:h2:mem:memdb",
-                   "user",
+                   "username",
                    "password"
                 );
                 
@@ -56,7 +56,7 @@ public class CrudEazy {
                    "h2file",
                    "org.h2.Driver",
                    "jdbc:h2:./localdb",
-                   "user",
+                   "username",
                    "password"
                 );
 
@@ -68,7 +68,7 @@ public class CrudEazy {
                    "mariadb",
                    "org.mariadb.jdbc.Driver",
                    "jdbc:mariadb://localhost:3306/springbootdb",
-                   "user",
+                   "username",
                    "password"
                 );
 
@@ -76,7 +76,7 @@ public class CrudEazy {
                    "postgresdb",
                    "org.postgresql.Driver",
                    "jdbc:postgresql://localhost:5432/postgres",
-                   "user",
+                   "username",
                    "password"
                 );
                 

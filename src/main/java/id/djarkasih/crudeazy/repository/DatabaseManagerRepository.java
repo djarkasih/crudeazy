@@ -5,7 +5,7 @@
  */
 package id.djarkasih.crudeazy.repository;
 
-import id.djarkasih.crudeazy.model.DatabaseManager;
+import id.djarkasih.crudeazy.model.domain.DatabaseManager;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 

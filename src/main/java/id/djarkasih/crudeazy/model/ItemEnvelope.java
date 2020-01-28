@@ -3,29 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package id.djarkasih.crudeazy.util;
+package id.djarkasih.crudeazy.model;
 
 /**
  *
  * @author ahmad
  */
-public class JsonEnvelope extends Envelope {
+public class ItemEnvelope extends Envelope{
     
-    private MultiplePayload payload;
+    private Object payload;
 
-    public JsonEnvelope() {
+    public ItemEnvelope() {
         super();
     }
 
-    public JsonEnvelope(boolean success, int code, String message) {
+    public ItemEnvelope(boolean success, int code, String message) {
         super(success, code, message);
     }
 
-    public MultiplePayload getPayload() {
+    public Object getPayload() {
         return payload;
     }
 
-    public void setPayload(MultiplePayload payload) {
+    public void setPayload(Object payload) {
         this.payload = payload;
     }
     

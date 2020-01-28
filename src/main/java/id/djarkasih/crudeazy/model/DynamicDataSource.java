@@ -7,7 +7,7 @@ package id.djarkasih.crudeazy.model;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import id.djarkasih.crudeazy.model.Database;
+import id.djarkasih.crudeazy.model.domain.Database;
 
 /**
  *

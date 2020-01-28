@@ -5,7 +5,7 @@
  */
 package id.djarkasih.crudeazy.service;
 
-import id.djarkasih.crudeazy.model.Collection;
+import id.djarkasih.crudeazy.model.domain.Collection;
 import java.util.List;
 
 /**

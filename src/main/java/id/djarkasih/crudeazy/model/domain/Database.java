@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package id.djarkasih.crudeazy.model;
+package id.djarkasih.crudeazy.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
@@ -21,6 +21,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -36,10 +37,13 @@ public class Database {
     @GeneratedValue
     private Long databaseId;
     @Column(unique=true, nullable=false)
+    @Size(min=4,message="Database name should be at least 4 characters long")
     private String name;
     private String driverName;
     private String url;
+    @Size(min=8,max=16,message="Username length should be between 8 to 16 characters")
     private String username;
+    @Size(min=8,message="Password length should be at least 8 characters")
     private String password;
     
     @ManyToOne

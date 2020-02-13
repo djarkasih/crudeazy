@@ -16,7 +16,8 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 public interface DatabaseConfig {
-    
+
+    public long size();
     public Database save(@Valid Database inp);
     public Database find(String name);
     public List<Database> readAll();

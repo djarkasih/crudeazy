@@ -53,6 +53,18 @@ public class DatabaseEndpoint {
     @Qualifier("dbCfgJpaImpl")
     private DatabaseConfig dbcfg;
     
+    @GetMapping(value="/databases/size")
+    public ResponseEntity<Envelope> countDatabase() {
+        
+        long size = dbcfg.size();
+        
+        ItemEnvelope env = new ItemEnvelope(true, HttpStatus.OK.value(), "There are " + size + " database configuration(s).");
+        env.setPayload(size);
+        
+        return new ResponseEntity(env,HttpStatus.OK);
+        
+    }
+    
     @PostMapping(value="/databases")
     public ResponseEntity<Envelope> createDatabase(@RequestBody Map<String,Object> inp) throws DataIncomplete {
         

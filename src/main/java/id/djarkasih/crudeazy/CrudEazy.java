@@ -4,6 +4,7 @@ import id.djarkasih.crudeazy.model.domain.Database;
 import id.djarkasih.crudeazy.model.domain.DatabaseManager;
 import id.djarkasih.crudeazy.model.domain.Collection;
 import id.djarkasih.crudeazy.repository.DatabaseManagerRepository;
+import id.djarkasih.crudeazy.service.CrudService;
 import id.djarkasih.crudeazy.util.Constants;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -20,6 +21,9 @@ public class CrudEazy {
     
     @Autowired
     private Environment env;
+    
+    @Autowired
+    private CrudService<DatabaseManager,Long> dbmgrService;
     
     Logger logger = LoggerFactory.getLogger(CrudEazy.class);
 
@@ -128,6 +132,8 @@ public class CrudEazy {
                     
                 }
             }
+            //dbmgrService.setup(repo);
+            logger.info("There are " + dbmgrService.count() + " database manager(s)");
         };
     }
 }

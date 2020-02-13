@@ -106,5 +106,10 @@ public class DatabaseConfigJpaImpl implements DatabaseConfig {
         }
 
     }
+
+    @Override
+    public long size() {
+        return repo.numberOfDatabase();
+    }
     
 }

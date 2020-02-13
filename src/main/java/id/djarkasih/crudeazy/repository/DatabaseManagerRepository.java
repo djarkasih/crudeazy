@@ -6,6 +6,7 @@
 package id.djarkasih.crudeazy.repository;
 
 import id.djarkasih.crudeazy.model.domain.DatabaseManager;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -13,7 +14,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author ahmad
  */
-public interface DatabaseManagerRepository extends CrudRepository<DatabaseManager,Long> {
+public interface DatabaseManagerRepository extends CrudRepository<DatabaseManager,Long>, JpaSpecificationExecutor<DatabaseManager> {
     
     @Query(value ="select count(*) from collection", nativeQuery=true)
     long numberOfCollection();

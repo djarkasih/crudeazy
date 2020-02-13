@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package id.djarkasih.crudeazy.util;
+package id.djarkasih.crudeazy.repository;
 
-import id.djarkasih.crudeazy.repository.SearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
  *
  * @author ahmad
  */
-public class GenericSpecification<T> {
+public class SpecificationBuilder<T> {
     
     public Specification<T> with(SearchCriteria criteria) {
         

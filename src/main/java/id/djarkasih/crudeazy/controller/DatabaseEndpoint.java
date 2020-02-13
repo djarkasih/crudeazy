@@ -9,12 +9,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import id.djarkasih.crudeazy.error.DataIncomplete;
 import id.djarkasih.crudeazy.error.DataNotFound;
 import id.djarkasih.crudeazy.model.domain.Database;
-import id.djarkasih.crudeazy.service.DatabaseConfig;
 import id.djarkasih.crudeazy.model.Envelope;
 import id.djarkasih.crudeazy.model.DataEnvelope;
 import id.djarkasih.crudeazy.util.MapUtils;
 import id.djarkasih.crudeazy.model.MultiplePayload;
 import id.djarkasih.crudeazy.model.ItemEnvelope;
+import id.djarkasih.crudeazy.repository.SpecificationBuilder;
+import id.djarkasih.crudeazy.service.CrudService;
+import id.djarkasih.crudeazy.repository.SearchCriteria;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,16 +49,18 @@ public class DatabaseEndpoint {
     private final static Set<String> POST_KEYS = Set.of("name","driverName","url","username","password");
     private final static Set<String> PATCH_KEYS = Set.of("driverName","url","username","password");
     
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
-    @Qualifier("dbCfgJpaImpl")
-    private DatabaseConfig dbcfg;
+    private CrudService<Database,Long> dbService;
+    
+    private final SpecificationBuilder<Database> specbld = new SpecificationBuilder();
     
     @GetMapping(value="/databases/size")
     public ResponseEntity<Envelope> countDatabase() {
         
-        long size = dbcfg.size();
+        long size = dbService.count();
         
         ItemEnvelope env = new ItemEnvelope(true, HttpStatus.OK.value(), "There are " + size + " database configuration(s).");
         env.setPayload(size);
@@ -75,7 +79,7 @@ public class DatabaseEndpoint {
         
         Database indb = mapper.convertValue(inp, Database.class);
         
-        Database outdb = dbcfg.save(indb);
+        Database outdb = dbService.save(indb);
         
         ItemEnvelope env = new ItemEnvelope(true, HttpStatus.CREATED.value(),"Database configuration created.");
         env.setPayload(outdb);
@@ -89,7 +93,13 @@ public class DatabaseEndpoint {
         
         ItemEnvelope env = null;
         
-        Database db = dbcfg.find(dbName);
+        Specification spec = specbld.with(new SearchCriteria(
+            "name",
+            "=",
+            dbName
+        ));
+
+        Database db = dbService.findMatch(spec);
         if (db == null) {
             throw new DataNotFound("Could not found " + dbName + " configuration database.");
         } else {
@@ -104,7 +114,7 @@ public class DatabaseEndpoint {
     @GetMapping(value="/databases")
     public ResponseEntity<Envelope> getAll() {
 
-        List<Database> dbs = dbcfg.readAll();
+        List<Database> dbs = dbService.readAll();
         if (dbs == null) {
             
         }
@@ -124,7 +134,13 @@ public class DatabaseEndpoint {
            @RequestBody Map<String,Object> inp,
            @PathVariable("dbName") String dbName) throws DataNotFound, DataIncomplete {
         
-        Database indb = dbcfg.find(dbName);
+        Specification spec = specbld.with(new SearchCriteria(
+            "name",
+            "=",
+            dbName
+        ));
+
+        Database indb = dbService.findMatch(spec);
         if (indb == null) {
             throw new DataNotFound("Could not found " + dbName + " configuration database.");
         }
@@ -139,7 +155,7 @@ public class DatabaseEndpoint {
         Database outdb = null;
         try {
             BeanUtils.populate(indb, changedValues);
-            outdb = dbcfg.save(indb);
+            outdb = dbService.save(indb);
         } catch (IllegalAccessException | InvocationTargetException ex) {
         }
 
@@ -155,14 +171,21 @@ public class DatabaseEndpoint {
         
         ItemEnvelope env = null;
         
-        Database indb = dbcfg.find(dbName);
+        Specification spec = specbld.with(new SearchCriteria(
+            "name",
+            "=",
+            dbName
+        ));
+        
+        Database indb = dbService.findMatch(spec);
+        
         if (indb == null) {
             throw new DataNotFound("Could not found " + dbName + " configuration database.");
         }
         
-        dbcfg.Delete(indb);
+        dbService.delete(indb.getDatabaseId());
         
-        Database outdb = dbcfg.find(dbName);
+        Database outdb = dbService.findMatch(spec);
         if (outdb == null) {
             env = new ItemEnvelope(false, HttpStatus.OK.value(),"Database(" +  dbName + ")configuration removed.");
         } else {

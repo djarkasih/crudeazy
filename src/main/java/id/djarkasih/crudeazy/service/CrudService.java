@@ -19,6 +19,7 @@ public interface CrudService<T, ID> {
     public long count();
     public T save(T t);
     public T find(ID id);
+    public T findMatch(Specification spec);
     public List<T> readAll();
     public List<T> findAll(Specification spec);
     public boolean delete(ID id);

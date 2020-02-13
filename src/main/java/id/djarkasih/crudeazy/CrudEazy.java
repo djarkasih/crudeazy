@@ -1,11 +1,11 @@
 package id.djarkasih.crudeazy;
 
 import id.djarkasih.crudeazy.model.domain.Database;
-import id.djarkasih.crudeazy.model.domain.DatabaseManager;
 import id.djarkasih.crudeazy.model.domain.Collection;
-import id.djarkasih.crudeazy.repository.DatabaseManagerRepository;
+import id.djarkasih.crudeazy.repository.CollectionRepository;
+import id.djarkasih.crudeazy.repository.DatabaseRepository;
 import id.djarkasih.crudeazy.service.CrudService;
-import id.djarkasih.crudeazy.util.Constants;
+import id.djarkasih.crudeazy.service.GenericCrudService;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +21,13 @@ public class CrudEazy {
     
     @Autowired
     private Environment env;
+
+    @Autowired
+    private CrudService<Database,Long> dbService;
     
     @Autowired
-    private CrudService<DatabaseManager,Long> dbmgrService;
-    
+    private CrudService<Collection,Long> collService;
+
     Logger logger = LoggerFactory.getLogger(CrudEazy.class);
 
     public static void main(String[] args) {
@@ -32,108 +35,57 @@ public class CrudEazy {
     }
 
     @Bean
-    public CommandLineRunner initDatabaseInfo(DatabaseManagerRepository repo) {
+    public CommandLineRunner initDatabaseInfo() {
         return args -> {
             
             Set<String> profs = Set.of(env.getActiveProfiles());
             logger.info("Active profiles = " + profs.toString());
-        
-            DatabaseManager mgr;
 
-            if ((profs.contains("dev")) && (repo.count() == 0)) {
-                
-                mgr = new DatabaseManager(Constants.CRUD_EAZY);
+            if ((profs.contains("dev")) && (dbService.count() == 0)) {
 
                 var db1 = new Database(
                    "h2mem",
                    "org.h2.Driver",
-                   "jdbc:h2:mem:memdb",
-                   "username",
-                   "password"
+                   "jdbc:h2:mem:mydb",
+                   "memadmin",
+                   "m3m4dmK3y"
                 );
-                
-                db1.addCollection(new Collection("table1"));
-                db1.addCollection(new Collection("table2"));
-                db1.addCollection(new Collection("table3"));
 
                 var db2 = new Database(
                    "h2file",
                    "org.h2.Driver",
-                   "jdbc:h2:./localdb",
-                   "username",
-                   "password"
+                   "jdbc:h2:./mydb",
+                   "fileadmin",
+                   "f1l34dmK3y"
                 );
-
-                db2.addCollection(new Collection("table1"));
-                db2.addCollection(new Collection("table2"));
-                db2.addCollection(new Collection("table3"));
 
                 var db3 = new Database(
                    "mariadb",
                    "org.mariadb.jdbc.Driver",
-                   "jdbc:mariadb://localhost:3306/springbootdb",
-                   "username",
-                   "password"
+                   "jdbc:mariadb://localhost:3306/mydb",
+                   "mysqladmin",
+                   "mysql4dmK3y"
                 );
 
                 var db4 = new Database(
                    "postgresdb",
                    "org.postgresql.Driver",
-                   "jdbc:postgresql://localhost:5432/postgres",
-                   "username",
-                   "password"
+                   "jdbc:postgresql://localhost:5432/mydb",
+                   "postgresadmin",
+                   "p05tgr3s4dmK3y"
                 );
-                
-                mgr.addDatabase(db1);
-                mgr.addDatabase(db2);
-                mgr.addDatabase(db3);
-                mgr.addDatabase(db4);
                                 
-                repo.save(mgr);
+                dbService.save(db1);
+                dbService.save(db2);
+                dbService.save(db3);
+                dbService.save(db4);
                 
-                db1 = mgr.getDatabases().get("h2mem");
-                db1.addCollection(new Collection("table4"));
-                db1.addCollection(new Collection("table5"));
-
-                db2 = mgr.getDatabases().get("h2file");
-                db2.addCollection(new Collection("table6"));
-                db2.addCollection(new Collection("table7"));
-                
-                repo.save(mgr);
-                
-                logger.info("Dummy data created.");
+                logger.info("Example database data created.");
             }
 
-            logger.info("There are " + repo.count() + " Database Manager.");
-            logger.info("There are " + repo.numberOfDatabase() + " Database.");
-            logger.info("There are " + repo.numberOfCollection() + " Collection.");
+            logger.info("There are " + dbService.count() + " Database.");
+            logger.info("There are " + collService.count() + " Collection.");
             
-            mgr = repo.findByName("CrudEazy");
-            if (mgr != null) {
-                logger.info("mgr = " + mgr.toString());
-                
-                var dbs = mgr.getDatabases();
-                if (dbs != null) {
-                    
-                    dbs.forEach((String dbName, Database db) -> {
-                       
-                       logger.info("db = " +  db.toString()); 
-                        
-                       var recs = db.getRecords();
-                       if (recs != null){
-                       
-                           recs.forEach((String recName, Collection rec) -> {
-                               logger.info("rec = " + rec.toString());
-                           });
-                       
-                       }
-                        
-                    });
-                    
-                }
-            }
-            //dbmgrService.setup(repo);
-            logger.info("There are " + dbmgrService.count() + " database manager(s)");
         };
     }
 }

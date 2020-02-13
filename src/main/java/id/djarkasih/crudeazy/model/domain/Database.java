@@ -6,21 +6,11 @@
 package id.djarkasih.crudeazy.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
 
 /**
@@ -28,57 +18,51 @@ import javax.validation.constraints.Size;
  * @author ahmad
  */
 @Entity
-@Table(uniqueConstraints={
-    @UniqueConstraint(columnNames = {"managerId", "name"})
-}) 
+@Table(name="dbs")
 public class Database {
     
     @Id
     @GeneratedValue
     private Long databaseId;
+    
+    @JsonIgnore
+    private String userId = "crudeazyadm";
+    
     @Column(unique=true, nullable=false)
     @Size(min=4,message="Database name should be at least 4 characters long")
     private String name;
+    
     private String driverName;
+    
     private String url;
+    
     @Size(min=8,max=16,message="Username length should be between 8 to 16 characters")
     private String username;
+    
     @Size(min=8,message="Password length should be at least 8 characters")
     private String password;
     
-    @ManyToOne
-    @JoinColumn(name = "managerId")
-    private DatabaseManager manager;
-
-    @OneToMany(
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.EAGER
-    )
-    @MapKey(name="name")
-    private final Map<String,Collection> colls;
-
-    public void addCollection(Collection coll) {
-        colls.put(coll.getName(), coll);
-        coll.setDatabase(this);
-    }
- 
-    public void removeCollection(Collection coll) {
-        colls.remove(coll.getName());
-        coll.setDatabase(null);
-    }
-
     protected Database() {
-        this.colls = new HashMap();
     }
 
     public Database(String name, String driverName, String url, String username, String password) {
-        this.colls = new HashMap();
         this.name = name;
         this.driverName = driverName;
         this.url = url;
         this.username = username;
         this.password = password;
+    }
+
+    public Long getDatabaseId() {
+        return databaseId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -121,63 +105,17 @@ public class Database {
         this.password = password;
     }
 
-    public Long getDatabaseId() {
-        return databaseId;
-    }
-
-    @JsonIgnore
-    public DatabaseManager getManager() {
-        return manager;
-    }
-
-    public void setManager(DatabaseManager manager) {
-        this.manager = manager;
-    }
-
-    @JsonIgnore
-    public Map<String, Collection> getRecords() {
-        return colls;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Database{databaseId=").append(databaseId);
+        sb.append(", userId=").append(userId);
         sb.append(", name=").append(name);
         sb.append(", driverName=").append(driverName);
         sb.append(", url=").append(url);
         sb.append(", username=").append(username);
         sb.append('}');
         return sb.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 47 * hash + Objects.hashCode(this.databaseId);
-        hash = 47 * hash + Objects.hashCode(this.name);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Database other = (Database) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.databaseId, other.databaseId)) {
-            return false;
-        }
-        return true;
     }
 
 }

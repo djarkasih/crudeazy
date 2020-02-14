@@ -6,7 +6,9 @@
 package id.djarkasih.crudeazy.service;
 
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.validation.annotation.Validated;
 
 /**
  *
@@ -14,10 +16,11 @@ import org.springframework.data.jpa.domain.Specification;
  * @param <T>
  * @param <ID>
  */
+@Validated
 public interface CrudService<T, ID> {
     
     public long count();
-    public T save(T t);
+    public T save(@Valid T t);
     public T find(ID id);
     public T findMatch(Specification spec);
     public List<T> readAll();

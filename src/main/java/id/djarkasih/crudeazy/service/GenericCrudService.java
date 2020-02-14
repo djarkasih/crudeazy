@@ -8,12 +8,12 @@ package id.djarkasih.crudeazy.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.validation.Valid;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.Repository;
-import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  *
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
  * @param <T>
  * @param <ID>
  */
+@Validated
 public class GenericCrudService<T,ID> implements CrudService<T,ID> {
 
     //@Autowired
@@ -39,7 +40,7 @@ public class GenericCrudService<T,ID> implements CrudService<T,ID> {
     }
     
     @Override
-    public T save(T obj) {
+    public T save(@Valid T obj) {
         return crudRepo.save(obj);
     }
 

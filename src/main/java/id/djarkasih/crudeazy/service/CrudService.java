@@ -20,11 +20,11 @@ import org.springframework.validation.annotation.Validated;
 public interface CrudService<T, ID> {
     
     public long count();
-    public T save(@Valid T t);
+    public T save(@Valid T obj);
     public T find(ID id);
     public T findMatch(Specification spec);
     public List<T> readAll();
     public List<T> findAll(Specification spec);
-    public boolean delete(ID id);
+    public boolean delete(Specification spec);
     
 }

@@ -34,6 +34,7 @@ public class Database {
     
     private String driverName;
     
+    @Column(nullable=false)
     private String url;
     
     @Size(min=8,max=16,message="Username length should be between 8 to 16 characters")

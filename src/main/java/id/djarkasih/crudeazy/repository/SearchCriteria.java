@@ -33,4 +33,9 @@ public class SearchCriteria {
         return value;
     }
 
+    @Override
+    public String toString() {
+        return "[" + field + " " + operation + " " + value + ']';
+    }
+
 }

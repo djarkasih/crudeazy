@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -82,11 +83,16 @@ public class GenericCrudService<T,ID> implements CrudService<T,ID> {
     }
 
     @Override
-    public boolean delete(ID id) {
+    public boolean delete(Specification spec) {
         
-        boolean bOk = crudRepo.findById(id).isPresent();
+        Optional<T> opt = executor.findOne(spec);
         
-        if (bOk) crudRepo.deleteById(id);
+        boolean bOk = opt.isPresent();
+        
+        if (bOk) {
+            T obj = opt.get();
+            crudRepo.delete(obj);
+        }
         
         return bOk;
         

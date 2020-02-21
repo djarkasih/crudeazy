@@ -6,28 +6,34 @@
 package id.djarkasih.crudeazy.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
  * @author ahmad
  */
 @Entity
-@Table(name="colls") 
+@Table(name="colls",
+       uniqueConstraints=
+       @UniqueConstraint(columnNames={"databaseId", "name"})
+) 
 public class Collection {
     
     @Id
     @GeneratedValue
-    private Long collectionId;
+    private Long id;
     
     private Long databaseId;
     
     @JsonIgnore
-    private int kind = 0;
+    private String kind = "TABLE";
     
+    @Column(unique=true, nullable=false)
     private String name;
 
     protected Collection() {
@@ -42,6 +48,10 @@ public class Collection {
         this.name = name;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Long getDatabaseId() {
         return databaseId;
     }
@@ -50,11 +60,11 @@ public class Collection {
         this.databaseId = databaseId;
     }
 
-    public int getKind() {
+    public String getKind() {
         return kind;
     }
 
-    public void setKind(int kind) {
+    public void setKind(String kind) {
         this.kind = kind;
     }
 
@@ -64,6 +74,11 @@ public class Collection {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Collection{" + "id=" + id + ", databaseId=" + databaseId + ", kind=" + kind + ", name=" + name + '}';
     }
 
 }

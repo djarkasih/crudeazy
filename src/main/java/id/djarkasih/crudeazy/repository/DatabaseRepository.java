@@ -14,5 +14,7 @@ import org.springframework.data.repository.CrudRepository;
  * @author ahmad
  */
 public interface DatabaseRepository extends CrudRepository<Database,Long>, JpaSpecificationExecutor<Database> {
+
+    public Database findByName(String name);
     
 }

@@ -13,7 +13,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**

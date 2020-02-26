@@ -31,13 +31,13 @@ public class JpaServicesConfiguration {
 
     @Bean
     public CrudService<Database, Long> dbService() {
-        CrudService<Database, Long> service = new GenericCrudService<Database,Long>(dbRepo);
+        CrudService<Database, Long> service = new GenericCrudService<>(dbRepo);
         return service;
     }
     
     @Bean
     public CrudService<Collection, Long> collService() {
-        CrudService<Collection, Long> service = new GenericCrudService<Collection,Long>(collRepo);
+        CrudService<Collection, Long> service = new GenericCrudService<>(collRepo);
         return service;
     }
 

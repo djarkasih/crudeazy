@@ -2,10 +2,7 @@ package id.djarkasih.crudeazy;
 
 import id.djarkasih.crudeazy.model.domain.Database;
 import id.djarkasih.crudeazy.model.domain.Collection;
-import id.djarkasih.crudeazy.repository.CollectionRepository;
-import id.djarkasih.crudeazy.repository.DatabaseRepository;
 import id.djarkasih.crudeazy.service.CrudService;
-import id.djarkasih.crudeazy.service.GenericCrudService;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +49,11 @@ public class CrudEazy {
                 );
 
                 var db2 = new Database(
-                   "h2file",
+                   "dummy",
                    "org.h2.Driver",
-                   "jdbc:h2:./mydb",
-                   "fileadmin",
-                   "f1l34dmK3y"
+                   "jdbc:h2:./dummy",
+                   "dummyadm",
+                   "dummyK3y"
                 );
 
                 var db3 = new Database(
@@ -75,10 +72,19 @@ public class CrudEazy {
                    "p05tgr3s4dmK3y"
                 );
                                 
+                var db5 = new Database(
+                   "demo",
+                   "org.h2.Driver",
+                   "jdbc:h2:./demo",
+                   "demoadmin",
+                   "d3m04dm1n"
+                );
+
                 dbService.save(db1);
                 dbService.save(db2);
                 dbService.save(db3);
                 dbService.save(db4);
+                dbService.save(db5);
                 
                 logger.info("Example database data created.");
             }

@@ -11,18 +11,18 @@ package id.djarkasih.crudeazy.model;
  */
 public class ErrorEnvelope extends Envelope {
     
-    private ErrorPayload exceptions;
+    private Object error;
 
-    public ErrorEnvelope(int code, String message) {
-        super(false, code, message);
+    public ErrorEnvelope(int code) {
+        super(false, code);
     }
 
-    public ErrorPayload getExceptions() {
-        return exceptions;
+    public Object getError() {
+        return error;
     }
 
-    public void setExceptions(ErrorPayload exceptions) {
-        this.exceptions = exceptions;
+    public void setError(Object error) {
+        this.error = error;
     }
 
 }

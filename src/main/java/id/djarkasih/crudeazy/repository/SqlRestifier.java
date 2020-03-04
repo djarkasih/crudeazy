@@ -3,14 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package id.djarkasih.crudeazy.service;
+package id.djarkasih.crudeazy.repository;
 
+import id.djarkasih.crudeazy.error.RestifierError;
+import id.djarkasih.crudeazy.error.RestifierException;
+import id.djarkasih.crudeazy.service.Restifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.MultiValueMap;
 
@@ -20,7 +24,8 @@ import org.springframework.util.MultiValueMap;
  */
 public class SqlRestifier implements Restifier {
     
-    private static final Logger logger = LoggerFactory.getLogger(SqlRestifier.class);
+    @Autowired
+    private Logger logger;
     
     private final static String SQL_SELECT_COUNT = "select count(*) from %s";
     private final static String SQL_SELECT_COUNT_WHERE = "select count(*) from %s where %s";
@@ -33,8 +38,8 @@ public class SqlRestifier implements Restifier {
     private final static String SQL_ORDER_BY_CLAUSE = "order by %s";
     private final static String SQL_PAGING_OFFSET_CLAUSE = "limit %s offset %s";
     
-    private final int defaultPageSize = 10;
-    
+    private final boolean multiEditEnabled;
+    private final int defaultPageSize;
     
     private final JdbcTemplate jdbcTemplate;
     
@@ -62,7 +67,17 @@ public class SqlRestifier implements Restifier {
         List<String> conditions = new ArrayList();
         params.forEach((key,value)->{
             if (! Restifier.RESERVED_WORDS.contains(key)) {
-                conditions.add(key + " = '" + value.get(0) + "'");
+                String col = key;
+                String op = " = ";
+                String val = value.get(0);
+                
+                if (key.endsWith(".like")) {
+                    col = key.substring(0,key.lastIndexOf("."));
+                    op = " like ";
+                    val = val.replace("*", "%");
+                }
+                
+                conditions.add(col + op + "'" + val + "'");
             }
         });
         
@@ -194,12 +209,14 @@ public class SqlRestifier implements Restifier {
         
     }
 
-    public SqlRestifier(JdbcTemplate jdbcTemplate) {
+    public SqlRestifier(JdbcTemplate jdbcTemplate, int defaultPageSize, boolean multiEditEnabled) {
         this.jdbcTemplate = jdbcTemplate;
+        this.defaultPageSize = defaultPageSize;
+        this.multiEditEnabled = multiEditEnabled;
     }
 
     @Override
-    public long count(String tableName, MultiValueMap<String,String> params) {
+    public long count(String tableName, MultiValueMap<String,String> params) throws RestifierException {
         
         String sql = null;
         
@@ -209,30 +226,48 @@ public class SqlRestifier implements Restifier {
         } else {
             sql = String.format(SQL_SELECT_COUNT_WHERE, tableName, conditions);
         }
-        
         logger.info("sql = " + sql);
-        Long count = jdbcTemplate.queryForObject(sql, Long.class);
+        
+        Long count = -1l;
+        try {
+            count = jdbcTemplate.queryForObject(sql, Long.class);
+        } catch (BadSqlGrammarException ex) {
+            Throwable throwable = null;
+            if (ex.getCause() != null)
+                throwable = ex.getCause();
+                        
+            throw new RestifierException(RestifierError.INVALID_SQL_SYNTAX,throwable);
+        }
         
         return count;
         
     }
 
     @Override
-    public boolean create(String tableName, Map<String, String> rec) {
+    public boolean create(String tableName, Map<String, String> rec) throws RestifierException {
 
         Map<String,String> colsValues = this.buildColumnsAndValuesClause(rec);
         
         String sql = String.format(SQL_INSERT_INTO, tableName, colsValues.get("columns"), colsValues.get("values"));
-
         logger.info("sql = " + sql);
-        int numOfRows = jdbcTemplate.update(sql);
+        
+        int numOfRows = -1;
+        try {
+            numOfRows = jdbcTemplate.update(sql);
+        } catch (BadSqlGrammarException ex) {
+            Throwable throwable = null;
+            if (ex.getCause() != null)
+                throwable = ex.getCause();
+                        
+            throw new RestifierException(RestifierError.INVALID_SQL_SYNTAX,throwable);
+        }
                 
         return numOfRows == 1;
         
     }
 
     @Override
-    public List<Map<String, Object>> findAll(String tableName, MultiValueMap<String,String> params) {
+    public List<Map<String, Object>> findAll(String tableName, MultiValueMap<String,String> params) throws RestifierException {
 
         String sql;
         
@@ -249,38 +284,81 @@ public class SqlRestifier implements Restifier {
             sql = sql + " " + orders;
         
         sql = sql + " " + this.buildPagingClause(params);
-        
         logger.info("sql = " + sql);
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+        
+        List<Map<String, Object>> rows = null;
+        try {
+            rows = jdbcTemplate.queryForList(sql);
+        } catch (BadSqlGrammarException ex) {
+            Throwable throwable = null;
+            if (ex.getCause() != null)
+                throwable = ex.getCause();
+                        
+            throw new RestifierException(RestifierError.INVALID_SQL_SYNTAX,throwable);
+        }
         
         return rows;
 
     }
     
     @Override
-    public int update(String tableName, Map<String, String> rec, MultiValueMap<String, String> filters) {
+    public int update(String tableName, Map<String, String> rec, MultiValueMap<String, String> filters) throws RestifierException {
+        
+        long count = this.count(tableName, filters);
+        
+        if (count <= 0)
+            throw new RestifierException(RestifierError.DATA_NOT_FOUND,"No data matched.");
+        
+        if ((count > 1) && (! this.multiEditEnabled))
+            throw new RestifierException(RestifierError.MULTI_ROW_EDIT_DISABLED,"More than 1 row(s) will be affected.");
         
         String conditions = this.buildWhereClause(filters);
         String setters = this.buildSetClause(rec);
         
-        String sql = String.format(SQL_UPDATE_WHERE, tableName, setters, conditions);
-        
+        String sql = String.format(SQL_UPDATE_WHERE, tableName, setters, conditions);        
         logger.info("sql = " + sql);
-        int numOfRows = jdbcTemplate.update(sql);
+        
+        int numOfRows = -1;
+        try {
+            numOfRows = jdbcTemplate.update(sql);
+        } catch (BadSqlGrammarException ex) {
+            Throwable throwable = null;
+            if (ex.getCause() != null)
+                throwable = ex.getCause();
+                        
+            throw new RestifierException(RestifierError.INVALID_SQL_SYNTAX,throwable);
+        }
         
         return numOfRows;
         
     }
     
     @Override
-    public int delete(String tableName, MultiValueMap<String, String> filters) {
+    public int delete(String tableName, MultiValueMap<String, String> filters) throws RestifierException {
+
+        long count = this.count(tableName, filters);
+        
+        if (count <= 0)
+            throw new RestifierException(RestifierError.DATA_NOT_FOUND,"No data matched.");
+        
+        if ((count > 1) && (! this.multiEditEnabled))
+            throw new RestifierException(RestifierError.MULTI_ROW_EDIT_DISABLED,"More than 1 row(s) will be affected.");
 
         String conditions = this.buildWhereClause(filters);
         
         String sql = String.format(SQL_DELETE_WHERE, tableName, conditions);
-
         logger.info("sql = " + sql);
-        int numOfRows = jdbcTemplate.update(sql);
+        
+        int numOfRows = -1;
+        try {
+            numOfRows = jdbcTemplate.update(sql);
+        } catch (BadSqlGrammarException ex) {
+            Throwable throwable = null;
+            if (ex.getCause() != null)
+                throwable = ex.getCause();
+                        
+            throw new RestifierException(RestifierError.INVALID_SQL_SYNTAX,throwable);
+        }
         
         return numOfRows;
         

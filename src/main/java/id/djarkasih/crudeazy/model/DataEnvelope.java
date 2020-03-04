@@ -11,21 +11,21 @@ package id.djarkasih.crudeazy.model;
  */
 public class DataEnvelope extends Envelope {
     
-    private MultiplePayload payload;
+    private Object payload;
 
     public DataEnvelope() {
         super();
     }
 
-    public DataEnvelope(boolean success, int code, String message) {
-        super(success, code, message);
+    public DataEnvelope(boolean success, int code) {
+        super(success, code);
     }
 
-    public MultiplePayload getPayload() {
+    public Object getPayload() {
         return payload;
     }
 
-    public void setPayload(MultiplePayload payload) {
+    public void setPayload(Object payload) {
         this.payload = payload;
     }
     

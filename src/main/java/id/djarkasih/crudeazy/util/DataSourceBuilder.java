@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package id.djarkasih.crudeazy.model;
+package id.djarkasih.crudeazy.util;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -26,6 +26,17 @@ public class DataSourceBuilder {
                 
         return new HikariDataSource(cfg);
 
+    }
+    
+    public static DataSource build(String jdbcUrl, String jdbcUser, String jdbcPassword) {
+        
+        HikariConfig cfg = new HikariConfig();
+        cfg.setJdbcUrl(jdbcUrl);
+        cfg.setUsername(jdbcUser);
+        cfg.setPassword(jdbcPassword);
+        
+        return new HikariDataSource(cfg);
+        
     }
 
 }

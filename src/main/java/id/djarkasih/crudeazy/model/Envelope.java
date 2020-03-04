@@ -18,17 +18,15 @@ public abstract class Envelope {
     private final LocalDateTime timestamp;
     private boolean success;
     private int code;
-    private String message;
 
     protected Envelope() {
         this.timestamp = LocalDateTime.now();
     }
 
-    public Envelope(boolean success, int code, String message) {
+    public Envelope(boolean success, int code) {
         this.timestamp = LocalDateTime.now();
         this.success = success;
         this.code = code;
-        this.message = message;
     }
 
     public LocalDateTime getTimestamp() {
@@ -49,14 +47,6 @@ public abstract class Envelope {
 
     public void setCode(int code) {
         this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
     
 }

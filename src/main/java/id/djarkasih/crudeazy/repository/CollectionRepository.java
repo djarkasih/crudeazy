@@ -15,6 +15,7 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface CollectionRepository extends CrudRepository<Collection,Long>, JpaSpecificationExecutor<Collection> {
     
-    public boolean existsByDatabaseIdAndName(Long databaseId, String name);
+    public boolean existsByDatabaseIdAndAlias(Long databaseId, String alias);
+    public Collection findByAlias(String alias);
     
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -22,7 +23,7 @@ import javax.validation.constraints.Size;
 public class Database {
     
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long databaseId;
     
     @JsonIgnore
@@ -37,10 +38,10 @@ public class Database {
     @Column(nullable=false)
     private String url;
     
-    @Size(min=8,max=16,message="Username length should be between 8 to 16 characters")
+    @Size(min=4,max=16,message="Username length should be between 4 to 16 characters")
     private String username;
     
-    @Size(min=8,message="Password length should be at least 8 characters")
+    @Size(min=4,message="Password length should be at least 4 characters")
     private String password;
     
     protected Database() {

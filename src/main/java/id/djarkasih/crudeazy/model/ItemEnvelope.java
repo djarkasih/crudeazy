@@ -18,7 +18,7 @@ public class ItemEnvelope extends Envelope{
     }
 
     public ItemEnvelope(boolean success, int code, String message) {
-        super(success, code, message);
+        super(success, code);
     }
 
     public Object getPayload() {

@@ -5,9 +5,8 @@
  */
 package id.djarkasih.crudeazy.controller;
 
-import id.djarkasih.crudeazy.error.DataIncomplete;
-import id.djarkasih.crudeazy.error.DataNotFound;
-import id.djarkasih.crudeazy.error.DatabaseError;
+import id.djarkasih.crudeazy.error.RestifierError;
+import id.djarkasih.crudeazy.error.RestifierException;
 import id.djarkasih.crudeazy.model.Envelope;
 import id.djarkasih.crudeazy.model.domain.Collection;
 import id.djarkasih.crudeazy.model.domain.Database;
@@ -16,8 +15,6 @@ import id.djarkasih.crudeazy.repository.SpecificationBuilder;
 import id.djarkasih.crudeazy.service.CrudService;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -39,11 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value="/config")
 public class CollectionManager {
     
-    private final static Set<String> EDITABLE_KEYS = Set.of("databaseId","name");    
+    private final static Set<String> EDITABLE_KEYS = Set.of("databaseId","name","alias");    
     private static final String COLLECTIONS_PATH = "/collections";
-
-    private static final Logger logger = LoggerFactory.getLogger(CollectionManager.class);
-
+    
     private final CrudService<Database,Long> dbService;
     
     private final GenericCrudController crudController;
@@ -63,25 +58,28 @@ public class CollectionManager {
         
     }
     
-    public void checkDatabase(Map<String,Object> rec) throws DataNotFound, NumberFormatException {
+    public void checkDatabase(Map<String,Object> rec) throws RestifierException {
+        
+        if (rec.get("databaseId") == null)
+            throw new RestifierException(RestifierError.DATA_INCOMPLETE,"databaseId must present.");
         
         Long dbId = -1l;
         
         try {            
             dbId = Long.valueOf(rec.get("databaseId").toString());
         } catch (NumberFormatException ex) {
-            throw ex;
+            throw new RestifierException(RestifierError.INVALID_FORMAT,"databaseId must be an integer.");
         }
         
         Database db = dbService.find(dbId);
         if (db == null) {
-            throw new DataNotFound("Database (id=" + dbId + ") not found.");
+            throw new RestifierException(RestifierError.DATA_NOT_FOUND,"Database (id=" + dbId + ") not found.");
         }
 
     }
 
     @PostMapping(value=COLLECTIONS_PATH)
-    public ResponseEntity<Envelope> createCollection(@RequestBody Map<String,Object> inp) throws DataIncomplete, DataNotFound, NumberFormatException {
+    public ResponseEntity<Envelope> createCollection(@RequestBody Map<String,Object> inp) throws RestifierException {
         
         checkDatabase(inp);
 
@@ -89,13 +87,13 @@ public class CollectionManager {
         
     }
 
-    @GetMapping(value=COLLECTIONS_PATH + "/{collName}")
-    public ResponseEntity<Envelope> findCollection(@PathVariable("collName") String collName) throws DataNotFound {
+    @GetMapping(value=COLLECTIONS_PATH + "/{aliasName}")
+    public ResponseEntity<Envelope> findCollection(@PathVariable("aliasName") String aliasName) throws RestifierException {
         
         Specification spec = specbld.with(new SearchCriteria(
-            "name",
+            "alias",
             "=",
-            collName
+            aliasName
         ));
         
         return new ResponseEntity(crudController.findRecord(spec),HttpStatus.OK);
@@ -109,30 +107,30 @@ public class CollectionManager {
     
     }
     
-    @PutMapping(value=COLLECTIONS_PATH + "/{collName}")
+    @PutMapping(value=COLLECTIONS_PATH + "/{aliasName}")
     public ResponseEntity<Envelope> updateCollection(
            @RequestBody Map<String,Object> inp,
-           @PathVariable("collName") String collName) throws DataNotFound, DataIncomplete, NumberFormatException {
-                
-        checkDatabase(inp);
+           @PathVariable("aliasName") String aliasName) throws RestifierException, NumberFormatException {
         
+        checkDatabase(inp);
+
         Specification spec = specbld.with(new SearchCriteria(
-            "name",
+            "alias",
             "=",
-            collName
+            aliasName
         ));
         
         return new ResponseEntity(crudController.updateRecord(spec, inp),HttpStatus.OK);
     }
     
-    @DeleteMapping(value=COLLECTIONS_PATH + "/{collName}")
+    @DeleteMapping(value=COLLECTIONS_PATH + "/{aliasName}")
     public ResponseEntity<Envelope> deleteCollection(
-           @PathVariable("collName") String collName) throws DataNotFound, DatabaseError {
+           @PathVariable("aliasName") String aliasName) throws RestifierException {
         
         Specification spec = specbld.with(new SearchCriteria(
-            "name",
+            "alias",
             "=",
-            collName
+            aliasName
         ));
                 
         return new ResponseEntity(crudController.deleteRecord(spec),HttpStatus.OK);

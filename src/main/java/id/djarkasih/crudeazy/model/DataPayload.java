@@ -13,11 +13,11 @@ import java.util.Map;
  *
  * @author ahmad
  */
-public class MultiplePayload {
+public class DataPayload {
 
     private List<Map<String, Object>> data;
 
-    public MultiplePayload() {
+    public DataPayload() {
         this.data = new ArrayList();
     }
 

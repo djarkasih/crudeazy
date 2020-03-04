@@ -5,6 +5,7 @@
  */
 package id.djarkasih.crudeazy.service;
 
+import id.djarkasih.crudeazy.error.RestifierException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,13 +24,14 @@ public interface Restifier {
     public static final String IS_DISTINCT_KEY = "_isDistinct";
     
     public static final String RESTIFIER_KEY = "__restifierKey";
+    public static final String COLLECTION_NAME_KEY = "__collectionNameKey";
     
     public static final Set<String> RESERVED_WORDS = Set.of(FIELD_KEY,ORDER_BY_KEY,PAGE_NO_KEY,PAGE_SIZE_KEY,IS_DISTINCT_KEY);
     
-    public long count(String tableName, MultiValueMap<String,String> params);
-    public boolean create(String tableName, Map<String,String> rec);
-    public List<Map<String,Object>> findAll(String tableName, MultiValueMap<String,String> params);
-    public int update(String tableName, Map<String, String> rec, MultiValueMap<String, String> filters);
-    public int delete(String tableName, MultiValueMap<String, String> filters);
+    public long count(String tableName, MultiValueMap<String,String> params) throws RestifierException;
+    public boolean create(String tableName, Map<String,String> rec) throws RestifierException;
+    public List<Map<String,Object>> findAll(String tableName, MultiValueMap<String,String> params) throws RestifierException;
+    public int update(String tableName, Map<String, String> rec, MultiValueMap<String, String> filters) throws RestifierException;
+    public int delete(String tableName, MultiValueMap<String, String> filters) throws RestifierException;
     
 }

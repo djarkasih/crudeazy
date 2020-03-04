@@ -10,7 +10,13 @@ package id.djarkasih.crudeazy.error;
  * @author ahmad
  */
 public enum RestifierError {
+    MULTI_ROW_EDIT_DISABLED,
     DATABASE_NOT_FOUND,
     COLLECTION_NOT_FOUND,
-    INVALID_DATABASE_SETTING
+    INVALID_DATABASE_SETTING,
+    INVALID_SQL_SYNTAX,
+    INVALID_FORMAT,
+    DATA_INCOMPLETE,
+    DATA_NOT_FOUND,
+    DATABASE_ERROR
 }

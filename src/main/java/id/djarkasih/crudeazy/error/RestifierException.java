@@ -10,13 +10,26 @@ package id.djarkasih.crudeazy.error;
  * @author ahmad
  */
 public class RestifierException extends Exception {
+    
+    private final RestifierError errorType;
 
-    public RestifierException(RestifierError error) {
-        super(error.toString());
+    public RestifierException(RestifierError errorType) {
+        super(errorType.toString());
+        this.errorType = errorType;
     }
 
-    public RestifierException(RestifierError error, String message) {
-        super("[" + error.toString() + "] " + message);
+    public RestifierException(RestifierError errorType, String message) {
+        super("[" + errorType.toString() + "] " + message);
+        this.errorType = errorType;
+    }
+
+    public RestifierException(RestifierError errorType, Throwable cause) {
+        super(errorType.toString(),cause);
+        this.errorType = errorType;
+    }
+
+    public RestifierError getErrorType() {
+        return errorType;
     }
     
 }

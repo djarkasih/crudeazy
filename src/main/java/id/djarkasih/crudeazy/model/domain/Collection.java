@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -20,12 +21,12 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name="colls",
        uniqueConstraints=
-       @UniqueConstraint(columnNames={"databaseId", "name"})
+       @UniqueConstraint(columnNames={"databaseId", "alias"})
 ) 
 public class Collection {
     
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
     
     private Long databaseId;
@@ -33,8 +34,11 @@ public class Collection {
     @JsonIgnore
     private String kind = "TABLE";
     
-    @Column(unique=true, nullable=false)
+    @Column(nullable=false)
     private String name;
+    
+    @Column(nullable=false)
+    private String alias;
 
     protected Collection() {
     }
@@ -76,9 +80,17 @@ public class Collection {
         this.name = name;
     }
 
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
     @Override
     public String toString() {
-        return "Collection{" + "id=" + id + ", databaseId=" + databaseId + ", kind=" + kind + ", name=" + name + '}';
+        return "Collection{" + "id=" + id + ", databaseId=" + databaseId + ", kind=" + kind + ", alias=" + alias + '}';
     }
 
 }

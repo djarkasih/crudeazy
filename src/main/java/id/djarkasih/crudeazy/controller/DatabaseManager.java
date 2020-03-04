@@ -5,9 +5,7 @@
  */
 package id.djarkasih.crudeazy.controller;
 
-import id.djarkasih.crudeazy.error.DataIncomplete;
-import id.djarkasih.crudeazy.error.DataNotFound;
-import id.djarkasih.crudeazy.error.DatabaseError;
+import id.djarkasih.crudeazy.error.RestifierException;
 import id.djarkasih.crudeazy.model.domain.Database;
 import id.djarkasih.crudeazy.model.Envelope;
 import id.djarkasih.crudeazy.repository.SpecificationBuilder;
@@ -16,7 +14,6 @@ import id.djarkasih.crudeazy.repository.SearchCriteria;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -41,7 +38,8 @@ public class DatabaseManager {
     private final static Set<String> EDITABLE_KEYS = Set.of("name","driverName","url","username","password");
     private static final String DATABASE_PATH = "/databases";
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
+    @Autowired
+    private Logger logger;
     
     private final GenericCrudController<Database,Long> crudController;
     
@@ -61,14 +59,14 @@ public class DatabaseManager {
     }
     
     @PostMapping(value=DATABASE_PATH)
-    public ResponseEntity<Envelope> createDatabase(@RequestBody Map<String,Object> inp) throws DataIncomplete {
+    public ResponseEntity<Envelope> createDatabase(@RequestBody Map<String,Object> inp) throws RestifierException {
                 
         return new ResponseEntity(crudController.Create(inp),HttpStatus.CREATED);
         
     }
     
     @GetMapping(value=DATABASE_PATH + "/{dbName}")
-    public ResponseEntity<Envelope> findDatabase(@PathVariable("dbName") String dbName) throws DataNotFound {
+    public ResponseEntity<Envelope> findDatabase(@PathVariable("dbName") String dbName) throws RestifierException {
         
         Specification spec = specbld.with(new SearchCriteria(
             "name",
@@ -90,7 +88,7 @@ public class DatabaseManager {
     @PutMapping(value=DATABASE_PATH + "/{dbName}")
     public ResponseEntity<Envelope> updateDatabase(
            @RequestBody Map<String,Object> inp,
-           @PathVariable("dbName") String dbName) throws DataNotFound, DataIncomplete {
+           @PathVariable("dbName") String dbName) throws RestifierException {
         
         Specification spec = specbld.with(new SearchCriteria(
             "name",
@@ -104,7 +102,7 @@ public class DatabaseManager {
     
     @DeleteMapping(value=DATABASE_PATH + "/{dbName}")
     public ResponseEntity<Envelope> deleteDatabase(
-           @PathVariable("dbName") String dbName) throws DataNotFound, DatabaseError {
+           @PathVariable("dbName") String dbName) throws RestifierException {
         
         Specification spec = specbld.with(new SearchCriteria(
             "name",

@@ -5,13 +5,15 @@
  */
 package id.djarkasih.crudeazy.service;
 
-import id.djarkasih.crudeazy.model.DataSourceBuilder;
+import id.djarkasih.crudeazy.repository.SqlRestifier;
+import id.djarkasih.crudeazy.util.DataSourceBuilder;
 import id.djarkasih.crudeazy.model.domain.Database;
 import id.djarkasih.crudeazy.repository.DatabaseRepository;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,11 @@ public class RestifierProvider {
     
     @Autowired
     private DatabaseRepository repo;
+    
+    @Value("${crudeazy.multiEditEnabled}")
+    private boolean multiEditEnabled;
+    @Value("${crudeazy.pageSize}")
+    private int defaultPageSize;
     
     private final Map<String,JdbcTemplate> jdbcTemplates = new HashMap();
     
@@ -53,7 +60,7 @@ public class RestifierProvider {
     public Restifier getRestifierImplementation(String dbName) {
         
         JdbcTemplate template = this.getJdbcTemplate(dbName);
-        return new SqlRestifier(template);
+        return new SqlRestifier(template,defaultPageSize,multiEditEnabled);
         
     }
     

@@ -5,7 +5,6 @@ import id.djarkasih.crudeazy.model.domain.Collection;
 import id.djarkasih.crudeazy.service.CrudService;
 import java.util.Set;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +14,7 @@ import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 public class CrudEazy {
-    
+        
     @Autowired
     private Environment env;
 
@@ -25,7 +24,8 @@ public class CrudEazy {
     @Autowired
     private CrudService<Collection,Long> collService;
 
-    Logger logger = LoggerFactory.getLogger(CrudEazy.class);
+    @Autowired
+    private Logger logger;
 
     public static void main(String[] args) {
 	SpringApplication.run(CrudEazy.class, args);

@@ -5,6 +5,7 @@
  */
 package id.djarkasih.crudeazy.error;
 
+import static id.djarkasih.crudeazy.error.RestifierError.COLLECTION_NOT_FOUND;
 import id.djarkasih.crudeazy.model.ErrorEnvelope;
 import id.djarkasih.crudeazy.model.ErrorPayload;
 import id.djarkasih.crudeazy.model.FieldViolation;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,33 +27,52 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalHandler {
     
-    @ExceptionHandler({DataNotFound.class})
-    public final ResponseEntity<ErrorEnvelope> handleDataNotFound(DataNotFound ex, HttpServletRequest req) {
+    @ExceptionHandler({RestifierException.class})
+    public final ResponseEntity<ErrorEnvelope> handleRestifierException(RestifierException ex, HttpServletRequest req) {
         
-        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.NOT_FOUND.value(), "Invalid Request : Data not found.");
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        switch (ex.getErrorType()) {
+            case MULTI_ROW_EDIT_DISABLED :
+            case INVALID_SQL_SYNTAX :
+            case INVALID_FORMAT :
+            case DATA_INCOMPLETE :
+                status = HttpStatus.BAD_REQUEST;
+                break;
+            case DATABASE_NOT_FOUND :
+            case COLLECTION_NOT_FOUND :
+            case DATA_NOT_FOUND :
+                status = HttpStatus.NOT_FOUND;
+                break;
+            case INVALID_DATABASE_SETTING : 
+            case DATABASE_ERROR :
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                break;
+        }
+        
+        ErrorEnvelope env = new ErrorEnvelope(status.value());
         
         ErrorPayload payload = new ErrorPayload(req.getRequestURI(),req.getMethod(),ex.getClass().getCanonicalName(),ex.getMessage());
         if (ex.getCause() != null) {
             payload.setCause(ex.getCause().getMessage());
         }
         
-        env.setExceptions(payload);
+        env.setError(payload);
         
-        return new ResponseEntity<>(env,HttpStatus.valueOf(env.getCode()));
+        return new ResponseEntity<>(env,status);
         
     }
 
-    @ExceptionHandler({DataIncomplete.class})
-    public final ResponseEntity<ErrorEnvelope> handleIncompleteData(DataIncomplete ex, HttpServletRequest req) {
+    @ExceptionHandler({DataAccessException.class})
+    public final ResponseEntity<ErrorEnvelope> handleDataAccessException(DataAccessException ex, HttpServletRequest req) {
         
-        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.BAD_REQUEST.value(), "Invalid Request : Incomplete input data.");
+        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.BAD_REQUEST.value());
         
         ErrorPayload payload = new ErrorPayload(req.getRequestURI(),req.getMethod(),ex.getClass().getCanonicalName(),ex.getMessage());
         if (ex.getCause() != null) {
             payload.setCause(ex.getCause().getMessage());
         }
         
-        env.setExceptions(payload);
+        env.setError(payload);
         
         return new ResponseEntity<>(env,HttpStatus.valueOf(env.getCode()));
         
@@ -59,7 +80,7 @@ public class GlobalHandler {
 
     @ExceptionHandler({ConstraintViolationException.class})
     public final ResponseEntity<ErrorEnvelope> handleDataValidationException(ConstraintViolationException ex, HttpServletRequest req) {
-        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.BAD_REQUEST.value(),"Invalid Request : Data Validation Error.");
+        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.BAD_REQUEST.value());
         
         ErrorPayload payload = new ErrorPayload(req.getRequestURI(),req.getMethod(),ex.getClass().getCanonicalName());
         
@@ -70,7 +91,7 @@ public class GlobalHandler {
             payload.setCause(ex.getCause().getMessage());
         }
         
-        env.setExceptions(payload);
+        env.setError(payload);
         
         return new ResponseEntity<>(env,HttpStatus.valueOf(env.getCode()));
         
@@ -78,14 +99,14 @@ public class GlobalHandler {
 
     @ExceptionHandler({HttpMessageNotReadableException.class})
     public final ResponseEntity<ErrorEnvelope> handleBadInputData(HttpMessageNotReadableException ex, HttpServletRequest req) {
-        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.BAD_REQUEST.value(), "Invalid Request : Invalid input data.");
+        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.BAD_REQUEST.value());
         
         ErrorPayload payload = new ErrorPayload(req.getRequestURI(),req.getMethod(),ex.getClass().getCanonicalName(),ex.getMessage());
         if (ex.getCause() != null) {
             payload.setCause(ex.getCause().getMessage());
         }
         
-        env.setExceptions(payload);
+        env.setError(payload);
         
         return new ResponseEntity<>(env,HttpStatus.valueOf(env.getCode()));
         
@@ -93,14 +114,15 @@ public class GlobalHandler {
 
     @ExceptionHandler({Exception.class})
     public final ResponseEntity<ErrorEnvelope> handleOtherExceptions(Exception ex, HttpServletRequest req) {
-        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Server Error");
+        
+        ErrorEnvelope env = new ErrorEnvelope(HttpStatus.INTERNAL_SERVER_ERROR.value());
         
         ErrorPayload payload = new ErrorPayload(req.getRequestURI(),req.getMethod(),ex.getClass().getCanonicalName(),ex.getMessage());
         if (ex.getCause() != null) {
             payload.setCause(ex.getCause().getMessage());
         }
         
-        env.setExceptions(payload);
+        env.setError(payload);
         
         return new ResponseEntity<>(env,HttpStatus.INTERNAL_SERVER_ERROR);
         

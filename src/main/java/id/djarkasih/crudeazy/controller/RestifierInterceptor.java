@@ -7,10 +7,12 @@ package id.djarkasih.crudeazy.controller;
 
 import id.djarkasih.crudeazy.error.RestifierError;
 import id.djarkasih.crudeazy.error.RestifierException;
+import id.djarkasih.crudeazy.model.domain.Collection;
 import id.djarkasih.crudeazy.model.domain.Database;
 import id.djarkasih.crudeazy.repository.CollectionRepository;
 import id.djarkasih.crudeazy.repository.DatabaseRepository;
 import id.djarkasih.crudeazy.service.Restifier;
+import static id.djarkasih.crudeazy.service.Restifier.COLLECTION_NAME_KEY;
 import static id.djarkasih.crudeazy.service.Restifier.RESTIFIER_KEY;
 import id.djarkasih.crudeazy.service.RestifierProvider;
 import java.util.Set;
@@ -51,7 +53,6 @@ public class RestifierInterceptor extends HandlerInterceptorAdapter {
         if (paths.length > 2)
             firstPath = "/" + paths[1];
 
-        logger.info("firstPath = " +  firstPath);
         return (firstPath != null) && (! modules.contains(firstPath));
 
     }
@@ -69,14 +70,16 @@ public class RestifierInterceptor extends HandlerInterceptorAdapter {
                 throw new RestifierException(RestifierError.DATABASE_NOT_FOUND);
             }
            
-            String tableName = inputs[2];
-            if (!collRepo.existsByDatabaseIdAndName(db.getDatabaseId(),tableName)) {
+            String alias = inputs[2];
+            if (!collRepo.existsByDatabaseIdAndAlias(db.getDatabaseId(),alias)) {
                 throw new RestifierException(RestifierError.COLLECTION_NOT_FOUND);
             }
             
             Restifier restifier = restifierProvider.getRestifierImplementation(dbName);
+            Collection coll = collRepo.findByAlias(alias);
             
             req.setAttribute(RESTIFIER_KEY, restifier);
+            req.setAttribute(COLLECTION_NAME_KEY, coll.getName());
         }
         
     }
@@ -85,12 +88,9 @@ public class RestifierInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
         
         if (isInsideMainService(req.getRequestURI())) {
-            logger.info("inside main service");
             
             this.addRestifierImplementor(req);
-            
-        } else {
-            logger.info("Outside main service");
+
         }
         
         return true;
